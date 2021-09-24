@@ -40,6 +40,24 @@ def main(subject, root_folder):
                 shutil.copy(fn, new_fn)
 
 
+    for old_session, session in zip(['3t1', '7t1'], ['sns3t', 'ibt7t']):
+        fmap_jsons = glob.glob(op.join(root_folder, f'sub-{subject:02d}', f'ses-{session}', 'fmap', '*.json'))
+        print(fmap_jsons)
+
+        for json_fn in fmap_jsons:
+            with open(json_fn) as handle:
+                d = json.load(handle)
+
+                d['IntendedFor'] = f'ses-{session}/' + d['IntendedFor'].replace(f'sub-{old_subject}', f'sub-{subject:02d}').replace(f'ses-{old_session}', f'ses-{session}')
+
+                if d['IntendedFor'].endswith('.nii'):
+                    d['IntendedFor'] += '.gz'
+
+            with open(json_fn, 'w') as handle:
+                json.dump(d, handle)
+
+
+
 
 if __name__ == '__main__':
 

@@ -61,7 +61,7 @@ def main(subject, session, root_folder):
 
             with open(source.sidecar_json, 'r') as f:
                 meta_fmap = json.load(f)
-                meta_fmap['IntendedFor'] = f'ses-{session}/func/sub-{subject}_task-mapper_run-{target.name}.nii.gz'
+                meta_fmap['IntendedFor'] = f'ses-{session}/func/sub-{subject}_ses-{session}_task-mapper_run-{target.name}_bold.nii.gz'
 
             fmap.to_filename(
                 op.join(fmap_path, f'sub-{subject}_ses-{session}_run-{target.name}_epi.nii.gz'))
@@ -86,7 +86,7 @@ def main(subject, session, root_folder):
         if not op.exists(anat_path):
             os.makedirs(anat_path)
 
-        new_t1w_fn = op.join(anat_path, f'sub-{subject}_acq-mprage_T1w.nii.gz')
+        new_t1w_fn = op.join(anat_path, f'sub-{subject}_ses-{session}_acq-mprage_T1w.nii.gz')
         shutil.copy(t1w, new_t1w_fn)
         shutil.copy(t1w.replace('.nii.gz', '.json'),
                     new_t1w_fn.replace('.nii.gz', '.json'))
@@ -96,9 +96,9 @@ def main(subject, session, root_folder):
         print(mp2rage)
         assert(len(mp2rage) == 3), "Did not find exactly 3 mp2rages"
 
-        for ix, fn in enumerate([f'sub-{subject}_acq-mp2rage_inv-1_part-mag_MP2RAGE.nii.gz',
-            f'sub-{subject}_acq-mp2rage_UNIT1.nii.gz',
-            f'sub-{subject}_acq-mp2rage_inv-2_part-mag_MP2RAGE.nii.gz']):
+        for ix, fn in enumerate([f'sub-{subject}_ses-{session}_acq-mp2rage_inv-1_part-mag_MP2RAGE.nii.gz',
+            f'sub-{subject}-{session}_acq-mp2rage_UNIT1.nii.gz',
+            f'sub-{subject}-{session}_acq-mp2rage_inv-2_part-mag_MP2RAGE.nii.gz']):
 
             shutil.copy(mp2rage[ix],
                 op.join(anat_path, fn))
@@ -110,7 +110,7 @@ def main(subject, session, root_folder):
         print(gre)
         assert(len(gre) == 4), "Did not find exactly 4 GREs"
 
-        for ix, fn in enumerate([f'sub-{subject}_part-mag_T2starw.nii.gz',
+        for ix, fn in enumerate([f'sub-{subject}_ses-{session}_part-mag_T2starw.nii.gz',
             f'sub-{subject}_part-phase_T2starw.nii.gz']):
             shutil.copy(gre[ix],
                 op.join(anat_path, fn))
@@ -151,7 +151,7 @@ def main(subject, session, root_folder):
 
             with open(source.sidecar_json, 'r') as f:
                 meta_fmap = json.load(f)
-                meta_fmap['IntendedFor'] = f'ses-{session}/func/sub-{subject}_task-mapper_run-{target.name}.nii.gz'
+                meta_fmap['IntendedFor'] = f'ses-{session}/func/sub-{subject}_ses-{session}_task-mapper_run-{target.name}_bold.nii.gz'
 
             fmap.to_filename(op.join(fmap_path, f'sub-{subject}_ses-{session}_run-{target.name}_epi.nii.gz'))
 
@@ -175,7 +175,7 @@ def main(subject, session, root_folder):
         if not op.exists(anat_path):
             os.makedirs(anat_path)
 
-        new_t1w_fn = op.join(anat_path, f'sub-{subject}_acq-mprage_T1w.nii.gz')
+        new_t1w_fn = op.join(anat_path, f'sub-{subject}_ses-{session}_acq-mprage_T1w.nii.gz')
         shutil.copy(t1w, new_t1w_fn)
         shutil.copy(t1w.replace('.nii.gz', '.json'),
                     new_t1w_fn.replace('.nii.gz', '.json'))
@@ -185,9 +185,9 @@ def main(subject, session, root_folder):
         print(mp2rage)
         assert(len(mp2rage) == 3), "Did not find exactly 3 mp2rages"
 
-        for ix, fn in enumerate([f'sub-{subject}_acq-mp2rage_inv-1_part-mag_MP2RAGE.nii.gz',
-            f'sub-{subject}_acq-mp2rage_inv-2_part-mag_MP2RAGE.nii.gz',
-            f'sub-{subject}_acq-mp2rage_UNIT1.nii.gz']):
+        for ix, fn in enumerate([f'sub-{subject}_ses-{session}_acq-mp2rage_inv-1_part-mag_MP2RAGE.nii.gz',
+            f'sub-{subject}_ses-{session}_acq-mp2rage_inv-2_part-mag_MP2RAGE.nii.gz',
+            f'sub-{subject}_ses-{session}_acq-mp2rage_UNIT1.nii.gz']):
 
             shutil.copy(mp2rage[ix],
                 op.join(anat_path, fn))
@@ -196,31 +196,34 @@ def main(subject, session, root_folder):
 
         gre = natsorted(glob.glob(op.join(path, '_t2_swi_tra_p3_*_e*.nii.gz')))
         print(gre)
-        assert(len(gre) == 12), "Did not find exactly 12 GREs"
 
-        for ix, fn in enumerate([f'sub-{subject}_echo-1_part-mag_T2starw.nii.gz',
-                                 f'sub-{subject}_echo-2_part-mag_T2starw.nii.gz',
-                                 f'sub-{subject}_echo-3_part-mag_T2starw.nii.gz']):
-            shutil.copy(gre[ix],
-                op.join(anat_path, fn))
-            shutil.copy(gre[ix].replace('.nii.gz', '.json'),
-                op.join(anat_path, fn).replace('.nii.gz', '.json'))
+        if(len(gre) == 12):
+            for ix, fn in enumerate([f'sub-{subject}_ses-{session}_echo-1_part-mag_T2starw.nii.gz',
+                                     f'sub-{subject}_ses-{session}_echo-2_part-mag_T2starw.nii.gz',
+                                     f'sub-{subject}_ses-{session}_echo-3_part-mag_T2starw.nii.gz']):
+                shutil.copy(gre[ix],
+                    op.join(anat_path, fn))
+                shutil.copy(gre[ix].replace('.nii.gz', '.json'),
+                    op.join(anat_path, fn).replace('.nii.gz', '.json'))
 
-        for ix, fn in enumerate([f'sub-{subject}_echo-1_part-phase_T2starw.nii.gz',
-                                 f'sub-{subject}_echo-2_part-phase_T2starw.nii.gz',
-                                 f'sub-{subject}_echo-3_part-phase_T2starw.nii.gz']):
-            shutil.copy(gre[ix+3],
-                op.join(anat_path, fn))
-            shutil.copy(gre[ix+3].replace('.nii.gz', '.json'),
-                op.join(anat_path, fn).replace('.nii.gz', '.json'))
+            for ix, fn in enumerate([f'sub-{subject}_ses-{session}_echo-1_part-phase_T2starw.nii.gz',
+                                     f'sub-{subject}_ses-{session}_echo-2_part-phase_T2starw.nii.gz',
+                                     f'sub-{subject}_ses-{session}_echo-3_part-phase_T2starw.nii.gz']):
+                shutil.copy(gre[ix+3],
+                    op.join(anat_path, fn))
+                shutil.copy(gre[ix+3].replace('.nii.gz', '.json'),
+                    op.join(anat_path, fn).replace('.nii.gz', '.json'))
+
+        else:
+            print("Did not find exactly 12 GREs")
 
         mtw = glob.glob(op.join(path, '_tfl_multiMTC_*.nii.gz'))
 
         if len(mtw) == 2:
-            shutil.copy(mtw[0].replace('.nii.gz', '.json'), op.join(anat_path, f'sub-{subject}_acq-mean_MTw.nii.gz'))
+            shutil.copy(mtw[0].replace('.nii.gz', '.json'), op.join(anat_path, f'sub-{subject}_ses-{session}_acq-mean_MTw.nii.gz'))
             mtw = image.mean_img(image.concat_imgs(mtw))
 
-            mtw.to_filename(op.join(anat_path, f'sub-{subject}_acq-mean_MTw.nii.gz'))
+            mtw.to_filename(op.join(anat_path, f'sub-{subject}_ses-{session}_acq-mean_MTw.nii.gz'))
         else:
             print('FOUND NO MTw!')
 
