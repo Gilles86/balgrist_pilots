@@ -1,0 +1,4 @@
+[submodule "braincoder"]
+	path = braincoder
+	url = git@github.com:Gilles86/braincoder.git
+	branch = refactor

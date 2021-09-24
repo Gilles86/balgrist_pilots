@@ -1,0 +1,13 @@
+version: '2'
+services:
+  balgrist:
+    entrypoint: zsh
+    build: .
+    environment:
+            - SUBJECTS_DIR=/data/derivatives/freesurfer
+    volumes:
+      - ./balgrist:/balgrist
+      - $DATA_DIR/ds-balgrist:/data
+      - $HOME/freesurfer/license.txt:/opt/freesurfer-6.0.1/license.txt
+      - /tmp:/tmp
+      - ./braincoder:/braincoder
