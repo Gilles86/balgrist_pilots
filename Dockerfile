@@ -7,7 +7,7 @@
 # 
 #     https://github.com/ReproNim/neurodocker
 # 
-# Timestamp: 2021/09/24 08:08:45 UTC
+# Timestamp: 2021/09/24 11:50:16 UTC
 
 FROM ubuntu
 
@@ -191,8 +191,7 @@ RUN export PATH="/opt/miniconda-latest/bin:$PATH" \
            "seaborn" \
            "ipython" \
            "pytables" \
-           "tensorflow" \
-           "tensorflow" \
+           "tensorflow=2.5" \
            "tensorflow-probability" \
     && sync && conda clean -y --all && sync \
     && bash -c "source activate neuro \
@@ -281,8 +280,7 @@ RUN echo '{ \
     \n          "seaborn", \
     \n          "ipython", \
     \n          "pytables", \
-    \n          "tensorflow", \
-    \n          "tensorflow", \
+    \n          "tensorflow=2.5", \
     \n          "tensorflow-probability" \
     \n        ], \
     \n        "pip_install": [ \
