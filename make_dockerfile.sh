@@ -8,7 +8,7 @@ neurodocker generate docker --base ubuntu --pkg-manager apt --freesurfer version
 	--ants version=2.3.4 \
   --install zsh wget git build-essential \
     --miniconda \
-      conda_install="python=3.7 pandas matplotlib scikit-learn seaborn ipython pytables tensorflow tensorflow tensorflow-probability" \
+      conda_install="python=3.7 pandas matplotlib scikit-learn seaborn ipython pytables tensorflow=2.5 tensorflow-probability" \
       pip_install="nilearn
 		nipype
                   pybids
