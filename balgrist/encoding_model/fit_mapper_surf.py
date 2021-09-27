@@ -68,6 +68,8 @@ def main(subject, session, bids_folder, smoothed=False, concatenate=False):
         avg_data = surf_cleaned.groupby(level=1, axis=0).mean()
         data = avg_data
 
+    paradigm[paradigm == 0.0] = -1e6
+
     print('DATA: ', data, data.shape)
 
     print('DATA MEAN', data.mean(0))
