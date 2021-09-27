@@ -77,9 +77,9 @@ def main(subject, session, bids_folder, smoothed=False, concatenate=False):
     model = GaussianPRFWithHRF(hrf_model=hrf_model)
 
     # SET UP GRID
-    mus = np.linspace(0, np.log(80), 5, dtype=np.float32)
-    sds = np.linspace(.01, 2, 5, dtype=np.float32)
-    amplitudes = np.linspace(1e-6, 10, 10, dtype=np.float32)
+    mus = np.linspace(0, np.log(80), 20, dtype=np.float32)
+    sds = np.linspace(.01, 2, 15, dtype=np.float32)
+    amplitudes = np.linspace(1e-6, 10, 15, dtype=np.float32)
     baselines = np.linspace(-2., 0., 4, endpoint=True, dtype=np.float32)
 
     optimizer = ParameterFitter(model, data, paradigm)
@@ -101,9 +101,8 @@ def main(subject, session, bids_folder, smoothed=False, concatenate=False):
         # write_gifti(subject, session, bids_folder, 'fsnative', values, target_fn)
         # transform_data(target_fn, f'sub-{subject}', bids_folder, target_subject='fsaverage')
 
-    optimizer.fit(init_pars=grid_parameters.values, learning_rate=.001,
-            r2_atol=0.00001,
-                  store_intermediate_parameters=False, max_n_iterations=5000)
+    optimizer.fit(init_pars=grid_parameters.values, learning_rate=.01,
+                  store_intermediate_parameters=False, max_n_iterations=10000)
     print(optimizer.r2)
 
     target_fn = op.join(
