@@ -14,6 +14,7 @@ import json
 import re
 from pathlib import Path
 
+import nibabel as nib
 import numpy as np
 import pandas as pd
 from nilearn import image
@@ -144,7 +145,10 @@ class Subject:
         masks = [image.resample_to_img(m, ref, interpolation='nearest')
                  if m.shape != ref.shape else m for m in masks]
         stacked = image.concat_imgs(masks)
-        return image.math_img('mask.sum(-1) == mask.shape[-1]', mask=stacked)
+        conj = image.math_img('mask.sum(-1) == mask.shape[-1]', mask=stacked)
+        # Ensure a 3-D output (math_img can carry a trailing singleton axis).
+        arr = np.squeeze(conj.get_fdata()).astype(np.int8)
+        return nib.Nifti1Image(arr, conj.affine)
 
     # ── confounds ──────────────────────────────────────────────────────────────
 
