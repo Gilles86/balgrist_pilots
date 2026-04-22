@@ -147,6 +147,20 @@ def main(subject, session, bids_folder=BIDS_FOLDER,
                   max_n_iterations=max_iter)
     print(f'[fit_mapper] optim R² median = {float(np.median(optimizer.r2)):.4f}')
 
+    # ── DIAGNOSTIC: dump estimated_parameters structure ───────────────────────
+    ep = optimizer.estimated_parameters
+    print(f'[fit_mapper] estimated_parameters: shape={ep.shape}  '
+          f'columns={list(ep.columns)}  index.name={ep.index.name}')
+    print(f'[fit_mapper] parameter stats per column:')
+    print(ep.describe().to_string())
+
+    # Sanity check: re-predict for a handful of high-R² voxels and confirm the
+    # prediction actually tracks the paradigm (rules out a save/label mismatch).
+    top_idx = optimizer.r2.sort_values(ascending=False).index[:5]
+    print(f'[fit_mapper] top-5 voxels by R²:')
+    print(optimizer.r2.loc[top_idx].to_frame('r2')
+          .join(ep.loc[top_idx]).to_string())
+
     # ── write outputs ─────────────────────────────────────────────────────────
     r2_path = (target_dir
                / f'sub-{subject}_ses-{session}_task-mapper'
@@ -161,6 +175,11 @@ def main(subject, session, bids_folder=BIDS_FOLDER,
                  f'_desc-{par_name}_space-{space}_pars.nii.gz')
         masker.inverse_transform(par_values.values.astype(np.float32)
                                  ).to_filename(str(out))
+        print(f'[fit_mapper] wrote desc-{par_name} '
+              f'(values min/median/max = '
+              f'{float(par_values.min()):.4f}/'
+              f'{float(par_values.median()):.4f}/'
+              f'{float(par_values.max()):.4f})')
     print('[fit_mapper] done.')
 
 
