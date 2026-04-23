@@ -147,8 +147,12 @@ class Subject:
         stacked = image.concat_imgs(masks)
         conj = image.math_img('mask.sum(-1) == mask.shape[-1]', mask=stacked)
         # Ensure a 3-D output (math_img can carry a trailing singleton axis).
-        arr = np.squeeze(conj.get_fdata()).astype(np.int8)
-        return nib.Nifti1Image(arr, conj.affine)
+        # Use uint8 so NiftiMasker does NOT inherit a narrow signed dtype for
+        # parameter maps written via inverse_transform.
+        arr = np.squeeze(conj.get_fdata()).astype(np.uint8)
+        out_img = nib.Nifti1Image(arr, conj.affine)
+        out_img.header.set_data_dtype(np.uint8)
+        return out_img
 
     # ── confounds ──────────────────────────────────────────────────────────────
 
