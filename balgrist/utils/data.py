@@ -288,6 +288,32 @@ class Subject:
             out.append(dm)
         return pd.concat(out, keys=runs, names=['run'])
 
+    # ── cleaned BOLD (PSC + confound regression) ──────────────────────────────
+
+    def get_cleaned_bold(self, session, run, space='T1w', smoothed=False):
+        """Return the cleaned BOLD timeseries for one run as a 4-D NIfTI image.
+
+        Pipeline: optional smoothing → PSC → regress out fmriprep confounds +
+        response-HRF regressor.  Everything needed by both ``fit_mapper`` and
+        the decoder.
+        """
+        bold_path = self.get_preprocessed_bold(session, runs=[run], space=space)[0]
+        d = image.load_img(str(bold_path))
+        if smoothed:
+            d = image.smooth_img(d, 5.0)
+        # PSC: per-voxel mean → 100
+        mean = image.mean_img(d)
+        d = image.math_img(
+            '100 * (img - m[..., None]) / np.where(m[..., None] == 0, 1, m[..., None])',
+            img=d, m=mean)
+        conf = self.get_fmriprep_confounds(session, runs=[run])[run].reset_index(drop=True)
+        rh = self.get_mapper_response_hrf(session, runs=[run]
+                                          ).xs(run, level='run').reset_index(drop=True)
+        conf = pd.concat([conf, rh], axis=1).values
+        return image.clean_img(d, confounds=conf, standardize=False,
+                               detrend=False, ensure_finite=True,
+                               t_r=self.get_tr(session, run=run))
+
     # ── output paths ───────────────────────────────────────────────────────────
 
     def get_derivative_dir(self, session, base, modality='func'):
@@ -295,6 +321,21 @@ class Subject:
              / f'sub-{self.subject_id}' / f'ses-{session}' / modality)
         d.mkdir(parents=True, exist_ok=True)
         return d
+
+
+def save_float32(masker, values_1d, path):
+    """Write masked voxel values as float32 NIfTI.
+
+    ``NiftiMasker.inverse_transform`` inherits the mask's header dtype, so
+    we override it explicitly — otherwise a uint8/int8 mask silently
+    quantises parameter maps on save.
+    """
+    img = masker.inverse_transform(np.asarray(values_1d, dtype=np.float32))
+    img.header.set_data_dtype(np.float32)
+    img.header['scl_slope'] = 1.0
+    img.header['scl_inter'] = 0.0
+    img.to_filename(str(path))
+    return img
 
 
 def get_all_subject_ids(bids_folder=BIDS_FOLDER, fmriprep_deriv='fmriprep'):
